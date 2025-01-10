@@ -1,0 +1,38 @@
+{
+    "Records": [
+        {
+            "eventVersion": "2.1",
+            "eventSource": "aws:s3",
+            "awsRegion": "us-east-1",
+            "eventTime": "2025-01-02T16:35:56.366Z",
+            "eventName": "ObjectCreated:Put",
+            "userIdentity": {
+                "principalId": "AWS:AROAXYU3QKNOT5OOEXNMH:user3607748=thomas.vercier@etu.emse.fr"
+            },
+            "requestParameters": {
+                "sourceIPAddress": "88.138.76.65"
+            },
+            "responseElements": {
+                "x-amz-request-id": "DMGDNJGXZMXN9304",
+                "x-amz-id-2": "07Lvho/kyPapC2ng8bVxyyhl7THXfWShRkcjL48kY6KzZw8g6ZQmYXLWGlAmTwglJ/Ugd6aVGPiqlat6nHhqYFo9R3KpE3nqquo9KXiprbE="
+            },
+            "s3": {
+                "s3SchemaVersion": "1.0",
+                "configurationId": "NewcsvS3",
+                "bucket": {
+                    "name": "rawdata280825",
+                    "ownerIdentity": {
+                        "principalId": "A2WL8I61T4MAIE"
+                    },
+                    "arn": "arn:aws:s3:::rawdata280825"
+                },
+                "object": {
+                    "key": "data-20221206.csv",
+                    "size": 20775395,
+                    "eTag": "a77f74ee62bcab7fbb660f370597a79d",
+                    "sequencer": "006776C05EF125FBA2"
+                }
+            }
+        }
+    ]
+}
