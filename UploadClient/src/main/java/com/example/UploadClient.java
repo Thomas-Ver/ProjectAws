@@ -1,19 +1,18 @@
 package com.example;
 
-import software.amazon.awssdk.regions.Region;
-import software.amazon.awssdk.services.s3.S3Client;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Scanner;
 
-import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.core.sync.RequestBody;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 public class UploadClient {
   
-  //public static String bucketName = "rawdata280825";
-  public static String bucketName = "testupload555";
+  public static String bucketName = "rawdatalambda280825";
   public static Scanner scanner = new Scanner(System.in);
   
   public static void main(String[] args) {
