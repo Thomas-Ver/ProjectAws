@@ -46,6 +46,7 @@ public class ConsolidateWorker  {
 
       // on écrit notre hashmap dans le fichier hashmap.ser
       WriteNewhashmapToS3(ConsolidateMap, outputBucket);
+      DeleteSummarizeFile(sourceBucket, sourceKey);
 
       return "Successfully processed " + sourceKey;
 
@@ -198,6 +199,21 @@ public class ConsolidateWorker  {
       e.printStackTrace();
     } catch (IOException e) {
       System.err.println("Erreur d'E/S lors de la sérialisation de l'objet.");
+      e.printStackTrace();
+    } 
+  }
+  public void DeleteSummarizeFile(String bucketName, String key) {
+    try {
+      DeleteObjectRequest deleteObjectRequest = DeleteObjectRequest.builder()
+          .bucket(bucketName)
+          .key(key)
+          .build();
+
+      s3Client.deleteObject(deleteObjectRequest);
+
+      System.out.println("Fichier supprimé avec succès : " + key);
+    } catch (S3Exception e) {
+      System.err.println("Erreur S3 : " + e.awsErrorDetails().errorMessage());
       e.printStackTrace();
     } 
   }

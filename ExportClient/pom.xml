@@ -46,7 +46,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>MainPollerConsolidate</mainClass>
+                            <mainClass>ExportClient</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>

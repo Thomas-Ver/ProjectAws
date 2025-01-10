@@ -128,11 +128,11 @@ public class ExportClient {
       writer.append(",");
       writer.append(String.valueOf(data.MeanTfdPerday));
       writer.append(",");
-      writer.append(String.valueOf(data.VarianceTfdPerday));
+      writer.append(String.valueOf(Math.sqrt(data.VarianceTfdPerday)));
       writer.append(",");
       writer.append(String.valueOf(data.MeanTfpPerday));
       writer.append(",");
-      writer.append(String.valueOf(data.VarianceTfpPerday));
+      writer.append(String.valueOf(Math.sqrt(data.VarianceTfpPerday)));
       writer.append("\n");
       writer.append("\n");
       writer.append("Date");
