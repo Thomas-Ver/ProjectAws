@@ -19,7 +19,7 @@ public class ConsolidateWorker  {
   }
 
   public String run(String sourceBucket, String sourceKey) {
-    HashMap<String, AggregatedData> ConsolidateMap = new HashMap<>();
+    HashMap<String, List<List<String>>> ConsolidateMap = new HashMap<>();
     try {
       try {
         s3Client.headObject(HeadObjectRequest.builder()
@@ -55,7 +55,7 @@ public class ConsolidateWorker  {
     }
   }
 
-  public void processCsv(InputStream inputStream, HashMap<String, AggregatedData> ConsolidateMap)
+  public void processCsv(InputStream inputStream, HashMap<String, List<List<String>>> ConsolidateMap)
       throws IOException, CsvException {
 
     try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
@@ -74,7 +74,7 @@ public class ConsolidateWorker  {
     }
   }
 
-  private void processRecord(String[] record, HashMap<String, AggregatedData> ConsolidateMap) {
+  private void processRecord(String[] record, HashMap<String, List<List<String>>> ConsolidateMap) {
 
     String sourceIp = record[1];
     String destIp = record[2];
@@ -95,14 +95,14 @@ public class ConsolidateWorker  {
     Value.add(forwardPackets);
 
     // Si la clé n'existe pas on la crée
-    ConsolidateMap.putIfAbsent(key, new AggregatedData());
+    ConsolidateMap.putIfAbsent(key, new ArrayList<>());
     // On ajoute la valeur à la clé
     ConsolidateMap.get(key).add(Value);
 
   }
 
-  private HashMap<String, AggregatedData> ReadConsolidateMapFromS3(String bucketName) {
-    HashMap<String, AggregatedData> map = null;
+  private HashMap<String, List<List<String>>> ReadConsolidateMapFromS3(String bucketName) {
+    HashMap<String, List<List<String>>> map = null;
 
     try {
       // Vérifiez si le fichier existe sur S3
@@ -128,7 +128,7 @@ public class ConsolidateWorker  {
         if (obj instanceof HashMap) {
           // Suppression des avertissements de type
           @SuppressWarnings("unchecked")
-          HashMap<String, AggregatedData> tempMap = (HashMap<String, AggregatedData>) obj;
+          HashMap<String, List<List<String>>> tempMap = (HashMap<String, List<List<String>>>) obj;
           map = tempMap;
         } else {
           System.err.println("L'objet désérialisé n'est pas une HashMap.");
@@ -171,7 +171,7 @@ public class ConsolidateWorker  {
     }
   }
 
-  public void WriteNewhashmapToS3(HashMap<String, AggregatedData> map, String bucketName) {
+  public void WriteNewhashmapToS3(HashMap<String, List<List<String>>> map, String bucketName) {
     try {
       // Créer un flux de sortie pour écrire l'objet sérialisé
       ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();

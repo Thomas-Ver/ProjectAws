@@ -104,7 +104,7 @@ public class SummarizeWorker {
         }
     }
 
-    private String convertToOutput(Map<String, AggregatedData> dailyTraffic) {
+    private String convertToOutput(Map<String, SummarizeWorker.AggregatedData> dailyTraffic) {
         StringBuilder output = new StringBuilder();
         output.append("date,source_ip,destination_ip,total_flow_duration,total_forward_packets\n");
 
