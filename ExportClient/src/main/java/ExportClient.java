@@ -1,25 +1,39 @@
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.*;
 import software.amazon.awssdk.core.ResponseInputStream;
-import com.opencsv.CSVReader;
-import com.opencsv.exceptions.CsvException;
 import java.io.*;
 import java.util.*;
 
 
 public class ExportClient {
 
-    public static String bucketName = "consolidateworker280825";
+    public static String bucketName = "consolidateworkerlambda280825";
     public static String keyName = "hashmap.ser";
-    public static String filePath = "/mnt/c/Users/thoma/OneDrive/Bureau/3A_ICM/majeur_info/Cloud_and_edge/FinalProject/ExportClient";
+    public static Scanner scanner = new Scanner(System.in);
     
 
     public static void main(String[] args) {
 
-
+      boolean bool = true;
       S3Client s3 = S3Client.builder().build();
       HashMap<String, AggregatedData> Consolidatemap = new ExportClient().ReadConsolidateMapFromS3(bucketName, s3);
-      System.out.println("HashMap chargée depuis S3 : " + Consolidatemap);
+      while (bool){
+
+        System.out.println("source IP: ");
+        String sourceIP = scanner.nextLine();
+        System.out.println("destination IP: ");
+        String destinationIP = scanner.nextLine();
+        if (Consolidatemap.containsKey(sourceIP +","+ destinationIP)){
+          System.out.println("La clé existe dans la HashMap");
+          CreatCsvFile(Consolidatemap.get(sourceIP +","+ destinationIP),sourceIP,destinationIP);
+          
+          
+        } else {
+          System.out.println("La clé n'existe pas dans la HashMap");
+          
+        }
+      }
+
 }
 
 
@@ -91,6 +105,58 @@ public class ExportClient {
                 "Erreur lors de la vérification de l'existence du fichier : " + e.awsErrorDetails().errorMessage());
         throw e;
       }
+    }
+  }
+  public static void CreatCsvFile(AggregatedData data, String sourceIp, String destinationIp) {
+    try {
+      FileWriter writer = new FileWriter("data_"+sourceIp+":"+destinationIp+".csv");
+      writer.append("Source IP");
+      writer.append(",");
+      writer.append("Destination IP");
+      writer.append(",");
+      writer.append("Mean TotalFlowDuration");
+      writer.append(",");
+      writer.append("Standard Deviation TotalFlowDuration");
+      writer.append(",");
+      writer.append("Mean TotalPacketsForward");
+      writer.append(",");
+      writer.append("Standard Deviation TotalPacketsForward");
+      writer.append("\n");
+      writer.append(sourceIp);
+      writer.append(",");
+      writer.append(destinationIp);
+      writer.append(",");
+      writer.append(String.valueOf(data.MeanTfdPerday));
+      writer.append(",");
+      writer.append(String.valueOf(data.VarianceTfdPerday));
+      writer.append(",");
+      writer.append(String.valueOf(data.MeanTfpPerday));
+      writer.append(",");
+      writer.append(String.valueOf(data.VarianceTfpPerday));
+      writer.append("\n");
+      writer.append("\n");
+      writer.append("Date");
+      writer.append(",");
+      writer.append("TotalFlowDuration");
+      writer.append(",");
+      writer.append("TotalPacketsForward");
+      writer.append("\n");
+      for (List<String> L : data.data){
+        writer.append(L.get(0));
+        writer.append(",");
+        writer.append(L.get(1));
+        writer.append(",");
+        writer.append(L.get(2));
+        writer.append("\n");
+      }
+
+
+      writer.flush();
+      writer.close();
+      System.out.println("Fichier CSV créé avec succès.");
+    } catch (IOException e) {
+      System.err.println("Erreur lors de la création du fichier CSV.");
+      e.printStackTrace();
     }
   }
 }
