@@ -16,7 +16,7 @@ public class ExportClient {
 
       boolean bool = true;
       S3Client s3 = S3Client.builder().build();
-      HashMap<String, AggregatedData> Consolidatemap = new ExportClient().ReadConsolidateMapFromS3(bucketName, s3);
+      HashMap<String, List<List<String>>> Consolidatemap = new ExportClient().ReadConsolidateMapFromS3(bucketName, s3);
       while (bool){
 
         System.out.println("source IP: ");
@@ -37,8 +37,8 @@ public class ExportClient {
 }
 
 
-  private HashMap<String, AggregatedData> ReadConsolidateMapFromS3(String bucketName, S3Client s3Client) {
-    HashMap<String, AggregatedData> map = null;
+  private HashMap<String, List<List<String>>> ReadConsolidateMapFromS3(String bucketName, S3Client s3Client) {
+    HashMap<String, List<List<String>>> map = null;
 
     try {
       // Vérifiez si le fichier existe sur S3
@@ -64,7 +64,7 @@ public class ExportClient {
         if (obj instanceof HashMap) {
           // Suppression des avertissements de type
           @SuppressWarnings("unchecked")
-          HashMap<String, AggregatedData> tempMap = (HashMap<String, AggregatedData>) obj;
+          HashMap<String, List<List<String>>> tempMap = (HashMap<String, List<List<String>>>) obj;
           map = tempMap;
         } else {
           System.err.println("L'objet désérialisé n'est pas une HashMap.");
@@ -107,7 +107,10 @@ public class ExportClient {
       }
     }
   }
-  public static void CreatCsvFile(AggregatedData data, String sourceIp, String destinationIp) {
+  public static void CreatCsvFile(List<List<String>> data, String sourceIp, String destinationIp) {
+
+    List<Double> ListMeanAndVariance = new ArrayList<>();
+    ListMeanAndVariance = MeanAndVariance(data);
     try {
       FileWriter writer = new FileWriter("data_"+sourceIp+":"+destinationIp+".csv");
       writer.append("Source IP");
@@ -126,13 +129,13 @@ public class ExportClient {
       writer.append(",");
       writer.append(destinationIp);
       writer.append(",");
-      writer.append(String.valueOf(data.MeanTfdPerday));
+      writer.append(ListMeanAndVariance.get(0).toString());
       writer.append(",");
-      writer.append(String.valueOf(Math.sqrt(data.VarianceTfdPerday)));
+      writer.append(ListMeanAndVariance.get(1).toString());
       writer.append(",");
-      writer.append(String.valueOf(data.MeanTfpPerday));
+      writer.append(ListMeanAndVariance.get(2).toString());
       writer.append(",");
-      writer.append(String.valueOf(Math.sqrt(data.VarianceTfpPerday)));
+      writer.append(ListMeanAndVariance.get(3).toString());
       writer.append("\n");
       writer.append("\n");
       writer.append("Date");
@@ -141,7 +144,7 @@ public class ExportClient {
       writer.append(",");
       writer.append("TotalPacketsForward");
       writer.append("\n");
-      for (List<String> L : data.data){
+      for (List<String> L : data){
         writer.append(L.get(0));
         writer.append(",");
         writer.append(L.get(1));
@@ -158,5 +161,30 @@ public class ExportClient {
       System.err.println("Erreur lors de la création du fichier CSV.");
       e.printStackTrace();
     }
+  }
+
+  public static List<Double> MeanAndVariance(List<List<String>> data){
+    List<Double> ListMeanAndVariance = new ArrayList<>();
+    Double MeanTfdPerday = 0.0;
+    Double MeanTfpPerday = 0.0;
+    Double VarianceTfdPerday = 0.0;
+    Double VarianceTfpPerday = 0.0;
+    for (List<String> L : data){
+      MeanTfdPerday += Double.parseDouble(L.get(1));
+      MeanTfpPerday += Double.parseDouble(L.get(2));
+    }
+    MeanTfdPerday = MeanTfdPerday/data.size();
+    MeanTfpPerday = MeanTfpPerday/data.size();
+    for (List<String> L : data){
+      VarianceTfdPerday += Math.pow(Double.parseDouble(L.get(1)) - MeanTfdPerday, 2);
+      VarianceTfpPerday += Math.pow(Double.parseDouble(L.get(2)) - MeanTfpPerday, 2);
+    }
+    VarianceTfdPerday = VarianceTfdPerday/data.size();
+    VarianceTfpPerday = VarianceTfpPerday/data.size();
+    ListMeanAndVariance.add(MeanTfdPerday);
+    ListMeanAndVariance.add(Math.sqrt(VarianceTfdPerday));
+    ListMeanAndVariance.add(MeanTfpPerday);
+    ListMeanAndVariance.add(Math.sqrt(VarianceTfpPerday));
+    return ListMeanAndVariance;
   }
 }
