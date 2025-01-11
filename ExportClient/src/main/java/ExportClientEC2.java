@@ -15,7 +15,7 @@ import software.amazon.awssdk.services.s3.model.HeadObjectResponse;
 import software.amazon.awssdk.services.s3.model.S3Exception;
 
 
-public class ExportClient {
+public class ExportClientEC2 {
 
     public static String bucketName = "consolidateworker280825";
     public static String keyName = "hashmap.ser";
@@ -26,7 +26,7 @@ public class ExportClient {
 
       boolean bool = true;
       S3Client s3 = S3Client.builder().build();
-      HashMap<String, List<List<String>>> Consolidatemap = new ExportClient().ReadConsolidateMapFromS3(bucketName, s3);
+      HashMap<String, List<List<String>>> Consolidatemap = new ExportClientEC2().ReadConsolidateMapFromS3(bucketName, s3);
       while (bool){
 
         System.out.println("source IP: ");

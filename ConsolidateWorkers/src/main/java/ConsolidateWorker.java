@@ -1,12 +1,28 @@
-import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.services.s3.model.*;
-import software.amazon.awssdk.core.ResponseInputStream;
+import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvException;
-import software.amazon.awssdk.core.sync.RequestBody;
 
-import java.io.*;
-import java.util.*;
+import software.amazon.awssdk.core.ResponseInputStream;
+import software.amazon.awssdk.core.sync.RequestBody;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
+import software.amazon.awssdk.services.s3.model.GetObjectRequest;
+import software.amazon.awssdk.services.s3.model.GetObjectResponse;
+import software.amazon.awssdk.services.s3.model.HeadObjectRequest;
+import software.amazon.awssdk.services.s3.model.HeadObjectResponse;
+import software.amazon.awssdk.services.s3.model.NoSuchKeyException;
+import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.s3.model.S3Exception;
 
 public class ConsolidateWorker  {
 
@@ -202,6 +218,7 @@ public class ConsolidateWorker  {
       e.printStackTrace();
     } 
   }
+
   public void DeleteSummarizeFile(String bucketName, String key) {
     try {
       DeleteObjectRequest deleteObjectRequest = DeleteObjectRequest.builder()

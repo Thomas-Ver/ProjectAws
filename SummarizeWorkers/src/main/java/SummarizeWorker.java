@@ -1,16 +1,30 @@
-import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.services.s3.model.*;
-import software.amazon.awssdk.core.ResponseInputStream;
-import com.opencsv.CSVReader;
-import com.opencsv.exceptions.CsvException;
-import software.amazon.awssdk.core.sync.RequestBody;
-
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+
+import com.opencsv.CSVReader;
+import com.opencsv.exceptions.CsvException;
+
+import software.amazon.awssdk.core.ResponseInputStream;
+import software.amazon.awssdk.core.sync.RequestBody;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
+import software.amazon.awssdk.services.s3.model.GetObjectRequest;
+import software.amazon.awssdk.services.s3.model.GetObjectResponse;
+import software.amazon.awssdk.services.s3.model.HeadObjectRequest;
+import software.amazon.awssdk.services.s3.model.NoSuchKeyException;
+import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.s3.model.S3Exception;
 
 public class SummarizeWorker {
   
@@ -50,6 +64,7 @@ public class SummarizeWorker {
       String outputKey = "daily_summary_" + java.time.LocalDate.now() + "_" + sourceKey;
       
       uploadToS3(processedCsv, outputKey);
+      DeleteSummarizeFile(sourceBucket, sourceKey);
       
       return "Successfully processed " + sourceKey;
       
@@ -145,6 +160,22 @@ public class SummarizeWorker {
       });
     
     return output.toString();
+  }
+
+  public void DeleteSummarizeFile(String bucketName, String key) {
+    try {
+      DeleteObjectRequest deleteObjectRequest = DeleteObjectRequest.builder()
+          .bucket(bucketName)
+          .key(key)
+          .build();
+
+      s3Client.deleteObject(deleteObjectRequest);
+
+      System.out.println("Fichier supprimé avec succès : " + key);
+    } catch (S3Exception e) {
+      System.err.println("Erreur S3 : " + e.awsErrorDetails().errorMessage());
+      e.printStackTrace();
+    } 
   }
   
   static class AggregatedData {

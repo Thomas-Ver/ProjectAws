@@ -10,18 +10,16 @@ import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
-public class UploadClient {
+public class UploadClientLambda {
   
-  public static String bucketName = "rawdata280825";
+  public static String bucketName = "rawdatalambda280825";
   public static Scanner scanner = new Scanner(System.in);
-  
+  public static String directoryPath = "/home/corentin/Documents/MSE/Majeure_info/Assignments/Cloud/testupload";
+
   public static void main(String[] args) {
     Region region = Region.US_EAST_1;
     S3Client s3 = S3Client.builder().region(region).build();
-    
-    System.out.println("Enter the directory path containing the files to upload: ");
-    String directoryPath = scanner.nextLine().trim();
-    
+        
     File directory = new File(directoryPath);
     if (!directory.isDirectory()) {
       System.out.println("Invalid directory path!");
