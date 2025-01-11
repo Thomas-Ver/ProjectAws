@@ -12,7 +12,7 @@ import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 public class UploadClientEC2 {
   
-  public static String bucketName = "rawdataec2569824";
+  public static String bucketName = "rawdata-ec2-021095";
   public static Scanner scanner = new Scanner(System.in);
   public static String directoryPath = "/home/corentin/Documents/MSE/Majeure_info/Assignments/Cloud/testupload";
   
