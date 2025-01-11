@@ -46,7 +46,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>MainPollerConsolidate</mainClass>
+                            <mainClass>BucketLoop</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>

@@ -14,7 +14,7 @@ public class UploadClientEC2 {
   
   public static String bucketName = "rawdata-ec2-021095";
   public static Scanner scanner = new Scanner(System.in);
-  public static String directoryPath = "/home/corentin/Documents/MSE/Majeure_info/Assignments/Cloud/testupload";
+  public static String directoryPath = "/home/corentin/testupload";
   
   public static void main(String[] args) {
     Region region = Region.US_EAST_1;

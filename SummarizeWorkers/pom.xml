@@ -46,7 +46,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>MainPoller</mainClass>
+                            <mainClass>BucketLoop</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>
@@ -125,26 +125,27 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>2.15.2</version> <!-- ou une version compatible -->
+            <version>2.15.2</version>
         </dependency>
-    
-      <dependency>
-        <groupId>org.apache.logging.log4j</groupId>
-        <artifactId>log4j-core</artifactId>
-        <version>2.12.1</version>
-      </dependency>
-    
-      <dependency>
-        <groupId>org.kie</groupId>
-        <artifactId>kie-api</artifactId>
-        <version>7.25.0.Final</version>
-      </dependency>
-    
-      <dependency>
-        <groupId>org.kie</groupId>
-        <artifactId>kie-api</artifactId>
-        <version>7.25.0.Final</version>
-      </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+            <version>2.12.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.kie</groupId>
+            <artifactId>kie-api</artifactId>
+            <version>7.25.0.Final</version>
+        </dependency>    
+        <dependency>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-java-sdk-s3</artifactId>
+        </dependency>    
+        <dependency>
+            <groupId>javax.mail</groupId>
+            <artifactId>mail</artifactId>
+            <version>1.5.0-b01</version>
+        </dependency>
     </dependencies>
 </project>
 

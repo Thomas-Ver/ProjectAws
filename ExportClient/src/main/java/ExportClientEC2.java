@@ -17,7 +17,7 @@ import software.amazon.awssdk.services.s3.model.S3Exception;
 
 public class ExportClientEC2 {
 
-    public static String bucketName = "consolidateworker280825";
+    public static String bucketName = "consolidate-worker-ec2-021095";
     public static String keyName = "hashmap.ser";
     public static Scanner scanner = new Scanner(System.in);
     
@@ -47,7 +47,7 @@ public class ExportClientEC2 {
 }
 
 
-  private HashMap<String, List<List<String>>> ReadConsolidateMapFromS3(String bucketName, S3Client s3Client) {
+  public HashMap<String, List<List<String>>> ReadConsolidateMapFromS3(String bucketName, S3Client s3Client) {
     HashMap<String, List<List<String>>> map = null;
 
     try {
@@ -117,6 +117,7 @@ public class ExportClientEC2 {
       }
     }
   }
+  
   public static void CreatCsvFile(List<List<String>> data, String sourceIp, String destinationIp) {
 
     List<Double> ListMeanAndVariance = new ArrayList<>();
