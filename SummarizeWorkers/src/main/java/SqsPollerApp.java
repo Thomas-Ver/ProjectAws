@@ -41,26 +41,28 @@ public class SqsPollerApp {
                         .queueUrl(queueUrl)
                         .maxNumberOfMessages(10)
                         .waitTimeSeconds(2)
-                        .visibilityTimeout(30)
+                        .visibilityTimeout(60)
                         .build();
 
                 ReceiveMessageResponse response = sqsClient.receiveMessage(receiveRequest);
                 List<Message> messages = response.messages();
 
                 if (!messages.isEmpty()) {
-                    // Submit each message to the thread pool
-                    for (Message message : messages) {
-                        executorService.submit(() -> {
-                            boolean success = processMessage(message);
-                            if (success) {
-                                deleteMessage(message);
-                            } else {
-                                System.out.println("Message not processed, will return to queue: " + message.messageId());
+                    executorService.submit(() -> {
+                        try {
+                            for (Message message : messages) {
+                                boolean success = processMessage(message);
+                                if (success) {
+                                    deleteMessage(message);
+                                } else {
+                                    System.err.println("Failed to process message: " + message.messageId());
+                                }
                             }
-                        });
-                    }
+                        } catch (Exception e) {
+                            System.err.println("Error in batch processing: " + e.getMessage());
+                        }
+                    });
                 }
-
             } catch (Exception e) {
                 System.err.println("Error in polling loop: " + e.getMessage());
 
