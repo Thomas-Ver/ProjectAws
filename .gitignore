@@ -1,2 +1,6 @@
 **/target
 **/.vscode
+ExportClient/**/*/
+ExportClient/.*
+.idea/
+data_*
