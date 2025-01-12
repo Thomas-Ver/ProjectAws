@@ -14,7 +14,7 @@ import com.amazonaws.services.s3.model.S3Object;
 public class S3Handler {
 
     private final AmazonS3 s3Client;
-    private static final String OUTPUT_BUCKET = "summarizeworkerlambda280825";
+    private static final String OUTPUT_BUCKET = "summarize-worker-lambda-021095";
 
     public S3Handler() {
         this.s3Client = AmazonS3ClientBuilder.defaultClient();

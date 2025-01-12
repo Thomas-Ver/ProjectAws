@@ -30,10 +30,12 @@ public class CsvProcessor {
         try {
             S3Object s3Object = s3Handler.getObject(bucketName, objectKey);
             String processedCsv = processCsv(s3Object.getObjectContent());
+            SQSLambdaHandler sqsLambdaHandler = new SQSLambdaHandler();
 
             String outputKey = "daily_summary_" + LocalDate.now() + "_" + objectKey;
 
             s3Handler.uploadToS3(processedCsv, outputKey);
+            sqsLambdaHandler.sendMessage(outputKey);
             s3Handler.deleteFileFromS3(bucketName, objectKey);
 
             System.out.println("Successfully processed and deleted " + objectKey);
