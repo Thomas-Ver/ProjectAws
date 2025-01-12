@@ -46,7 +46,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>ExportClient</mainClass>
+                            <mainClass>ExportClientEC2</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>

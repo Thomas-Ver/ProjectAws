@@ -78,24 +78,14 @@ public class ConsolidateWorker {
         String forwardPackets = record[4];
         String date = record[0];
 
-        List<String> newValue = new ArrayList<>();
-        newValue.add(date);
-        newValue.add(flowDuration);
-        newValue.add(forwardPackets);
+        List<String> Value = new ArrayList<>();
+        Value.add(date);
+        Value.add(flowDuration);
+        Value.add(forwardPackets);
 
         ConsolidateMap.putIfAbsent(key, new ArrayList<>());
-
-        boolean dateExists = false;
-        for (List<String> existingValue : ConsolidateMap.get(key)) {
-            if (existingValue.get(0).equals(date)) {
-                dateExists = true;
-                break;
-            }
-        }
-
-        if (!dateExists) {
-            ConsolidateMap.get(key).add(newValue);
-        }
+        
+        ConsolidateMap.get(key).add(Value);
     }
 
     private HashMap<String, List<List<String>>> ReadConsolidateMapFromS3(String bucketName) {
