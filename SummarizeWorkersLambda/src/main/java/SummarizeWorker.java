@@ -13,9 +13,9 @@ public class SummarizeWorker implements RequestHandler<S3Event, String> {
     private final S3Handler s3Handler;
     private final CsvProcessor csvProcessor;
 
-    public SummarizeWorker(CsvProcessor csvProcessor, S3Handler s3Handler) {
-        this.csvProcessor = csvProcessor;
-        this.s3Handler = s3Handler;
+    public SummarizeWorker() {
+        this.csvProcessor = new CsvProcessor();
+        this.s3Handler = new S3Handler();
     }
 
     @Override
