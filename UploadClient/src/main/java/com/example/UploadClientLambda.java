@@ -12,9 +12,9 @@ import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 public class UploadClientLambda {
   
-  public static String bucketName = "rawdatalambda280825";
+  public static String bucketName = "rawdata-lambda-021095";
   public static Scanner scanner = new Scanner(System.in);
-  public static String directoryPath = "/home/corentin/Documents/MSE/Majeure_info/Assignments/Cloud/testupload";
+  public static String directoryPath = "/home/corentin/testupload";
 
   public static void main(String[] args) {
     Region region = Region.US_EAST_1;
