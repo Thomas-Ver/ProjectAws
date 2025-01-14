@@ -6,11 +6,6 @@ import com.amazonaws.services.lambda.runtime.events.SQSEvent;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import software.amazon.awssdk.regions.Region;
-import software.amazon.awssdk.services.sqs.SqsClient;
-import software.amazon.awssdk.services.sqs.model.SendMessageRequest;
-import software.amazon.awssdk.services.sqs.model.SendMessageResponse;
-
 public class SQSLambdaHandler {
 
     public void handleRequest(SQSEvent sqsEvent, Context context) {
@@ -53,22 +48,5 @@ public class SQSLambdaHandler {
             context.getLogger().log("Error processing message: " + e.getMessage());
             e.printStackTrace();
         }
-    }
-
-    public void sendMessage(String fileName) {
-        Region region = Region.US_EAST_1;
-
-        String queueURL = "https://sqs.us-east-1.amazonaws.com/116404946400/sqs-summarize-worker-021095";
-        String bucketName = "summarize-worker-lambda-021095";
-
-        SqsClient sqsClient = SqsClient.builder().region(region).build();
-
-        SendMessageRequest sendRequest = SendMessageRequest.builder().queueUrl(queueURL)
-                .messageBody(bucketName + ";" + fileName).build();
-
-        SendMessageResponse sqsResponse = sqsClient.sendMessage(sendRequest);
-
-        System.out.println(
-                sqsResponse.messageId() + " Message sent. Status is " + sqsResponse.sdkHttpResponse().statusCode());
     }
 }
