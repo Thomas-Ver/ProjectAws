@@ -12,7 +12,7 @@ import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 public class UploadClientLambda {
   
-  public static String bucketName = "rawdata-lambda-021095";
+  public static String bucketName = "raw-data-lambda-021095";
   public static Scanner scanner = new Scanner(System.in);
   public static String directoryPath = "/home/corentin/testupload";
 

@@ -27,7 +27,6 @@ public class ConsolidateWorker {
 
     private final S3Client s3Client;
     private final String outputBucket;
-    private static final String HASHMAP_FILENAME = "hashmap.ser";
 
     public ConsolidateWorker(String outputBucket) {
         this.s3Client = S3Client.builder().build();
@@ -86,31 +85,11 @@ public class ConsolidateWorker {
         consolidateMap.putIfAbsent(key, new ArrayList<>());
         List<List<String>> existingValues = consolidateMap.get(key);
 
-        // Check if there's already an entry with the same date
-        boolean dateFound = false;
-        for (List<String> existingValue : existingValues) {
-            if (existingValue.get(0).equals(date)) {
-                // Sum up the values for matching dates
-                long sumFlowDuration = Long.parseLong(existingValue.get(1)) + Long.parseLong(flowDuration);
-                long sumForwardPackets = Long.parseLong(existingValue.get(2)) + Long.parseLong(forwardPackets);
-
-                // Update the existing entry with summed values
-                existingValue.set(1, String.valueOf(sumFlowDuration));
-                existingValue.set(2, String.valueOf(sumForwardPackets));
-                dateFound = true;
-                break;
-            }
-        }
-
-        // If no matching date was found, create new entry
-        if (!dateFound) {
-            List<String> newValue = new ArrayList<>();
-            newValue.add(date);
-            newValue.add(flowDuration);
-            newValue.add(forwardPackets);
-            existingValues.add(newValue);
-            existingValues.sort((a, b) -> a.get(0).compareTo(b.get(0))); // Sort by date
-        }
+        List<String> newValue = new ArrayList<>();
+        newValue.add(date);
+        newValue.add(flowDuration);
+        newValue.add(forwardPackets);
+        existingValues.add(newValue);
     }
 
     private HashMap<String, List<List<String>>> ReadConsolidateMapFromS3(String bucketName) {
