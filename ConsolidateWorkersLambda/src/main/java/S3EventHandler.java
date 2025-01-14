@@ -24,7 +24,7 @@ public class S3EventHandler {
 
     public void handleRequest(SQSEvent event, Context context) {
         Region region = Region.US_EAST_1;
-        String queueURL = "https://sqs.us-east-1.amazonaws.com/478245130330/poller-consolidate";
+        String queueURL = "https://sqs.us-east-1.amazonaws.com/116404946400/sqs-summarize-worker-021095";
         SqsClient sqsClient = SqsClient.builder().region(region).build();
 
         ReceiveMessageRequest receiveRequest = ReceiveMessageRequest.builder()

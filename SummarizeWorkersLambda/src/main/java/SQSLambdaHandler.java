@@ -58,7 +58,7 @@ public class SQSLambdaHandler {
     public void sendMessage(String fileName) {
         Region region = Region.US_EAST_1;
 
-        String queueURL = "https://sqs.us-east-1.amazonaws.com/478245130330/poller-consolidate";
+        String queueURL = "https://sqs.us-east-1.amazonaws.com/116404946400/sqs-summarize-worker-021095";
         String bucketName = "summarize-worker-lambda-021095";
 
         SqsClient sqsClient = SqsClient.builder().region(region).build();
