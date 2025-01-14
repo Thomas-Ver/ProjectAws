@@ -32,10 +32,12 @@ public class ExportClientLambda {
             String sourceIP = scanner.nextLine();
             System.out.println("destination IP: ");
             String destinationIP = scanner.nextLine();
-            if (Consolidatemap.containsKey(sourceIP + "," + destinationIP)) {
+            String key = sourceIP + "," + destinationIP;
+            if (Consolidatemap.containsKey(key)) {
                 System.out.println("La clé existe dans la HashMap");
-                CreatCsvFile(Consolidatemap.get(sourceIP + "," + destinationIP), sourceIP, destinationIP);
-
+                List<List<String>> rawData = Consolidatemap.get(key);
+                List<List<String>> consolidatedData = consolidateDates(rawData);
+                CreatCsvFile(consolidatedData, sourceIP, destinationIP);
             } else {
                 System.out.println("La clé n'existe pas dans la HashMap");
 
@@ -110,6 +112,45 @@ public class ExportClientLambda {
                 throw e;
             }
         }
+    }
+
+    public static List<List<String>> consolidateDates(List<List<String>> data) {
+        // Create a map to store consolidated values for each date
+        HashMap<String, List<Double>> dateMap = new HashMap<>();
+
+        // Group and sum values by date
+        for (List<String> record : data) {
+            String date = record.get(0);
+            double flowDuration = Double.parseDouble(record.get(1));
+            double packetCount = Double.parseDouble(record.get(2));
+
+            dateMap.putIfAbsent(date, new ArrayList<>());
+            List<Double> values = dateMap.get(date);
+            if (values.isEmpty()) {
+                values.add(flowDuration);
+                values.add(packetCount);
+            } else {
+                values.set(0, values.get(0) + flowDuration);
+                values.set(1, values.get(1) + packetCount);
+            }
+        }
+
+        // Create consolidated list
+        List<List<String>> consolidatedData = new ArrayList<>();
+        for (String date : dateMap.keySet()) {
+            List<Double> values = dateMap.get(date);
+
+            List<String> consolidatedRecord = new ArrayList<>();
+            consolidatedRecord.add(date);
+            consolidatedRecord.add(String.valueOf(values.get(0))); // Total flow duration
+            consolidatedRecord.add(String.valueOf(Math.round(values.get(1)))); // Total packets
+            consolidatedData.add(consolidatedRecord);
+        }
+
+        // Sort by date
+        consolidatedData.sort((a, b) -> a.get(0).compareTo(b.get(0)));
+
+        return consolidatedData;
     }
 
     public static void CreatCsvFile(List<List<String>> data, String sourceIp, String destinationIp) {
