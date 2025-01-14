@@ -7,7 +7,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
-import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.services.s3.model.S3Exception;
 
 public class S3EventHandler implements RequestHandler<SQSEvent, String> {
@@ -33,14 +32,8 @@ public class S3EventHandler implements RequestHandler<SQSEvent, String> {
                 String fileName = jsonNode.get("Records").get(0)
                         .get("s3").get("object").get("key").asText();
 
-                // Process the file
-                GetObjectRequest objectRequest = GetObjectRequest.builder()
-                        .key(fileName)
-                        .bucket(bucketName)
-                        .build();
-
                 ConsolidateWorker worker = new ConsolidateWorker(outputBucket);
-                worker.run(objectRequest);
+                worker.run(bucketName, fileName);
 
                 // Delete the processed file
                 deleteS3Object(bucketName, fileName);
