@@ -25,7 +25,7 @@ public class ExportClientLambda {
 
         boolean bool = true;
         S3Client s3 = S3Client.builder().build();
-        HashMap<String, List<List<String>>> Consolidatemap = new ExportClientEC2().ReadConsolidateMapFromS3(bucketName, s3);
+        HashMap<String, List<List<String>>> Consolidatemap = new ExportClientLambda().ReadConsolidateMapFromS3(bucketName, s3);
         while (bool) {
 
             System.out.println("source IP: ");
