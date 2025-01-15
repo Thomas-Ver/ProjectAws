@@ -69,7 +69,7 @@ public class ConsolidateWorker {
         }
     }
 
-    private void processRecord(String[] record, HashMap<String, List<List<String>>> consolidateMap) {
+    private void processRecord(String[] record, HashMap<String, List<List<String>>> ConsolidateMap) {
         String sourceIp = record[1];
         String destIp = record[2];
 
@@ -82,14 +82,26 @@ public class ConsolidateWorker {
         String forwardPackets = record[4];
         String date = record[0];
 
-        consolidateMap.putIfAbsent(key, new ArrayList<>());
-        List<List<String>> existingValues = consolidateMap.get(key);
+        // Get or create the list for this key
+        List<List<String>> existingValues = ConsolidateMap.computeIfAbsent(key, k -> new ArrayList<>());
 
+        // Create the new value list
         List<String> newValue = new ArrayList<>();
         newValue.add(date);
         newValue.add(flowDuration);
         newValue.add(forwardPackets);
-        existingValues.add(newValue);
+
+        // Check if this exact combination already exists
+        boolean valueExists = existingValues.stream().anyMatch(existing
+                -> existing.get(0).equals(date)
+                && existing.get(1).equals(flowDuration)
+                && existing.get(2).equals(forwardPackets)
+        );
+
+        // Only add if this exact combination doesn't exist
+        if (!valueExists) {
+            existingValues.add(newValue);
+        }
     }
 
     private HashMap<String, List<List<String>>> ReadConsolidateMapFromS3(String bucketName) {
