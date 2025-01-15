@@ -41,6 +41,7 @@ public class SQSPoller {
                         .queueUrl(queueUrl)
                         .maxNumberOfMessages(1)
                         .waitTimeSeconds(20)
+                        .visibilityTimeout(60)
                         .build();
 
                 // Receive messages from the queue
