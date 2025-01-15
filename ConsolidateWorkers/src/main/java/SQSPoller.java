@@ -63,19 +63,28 @@ public class SQSPoller {
 
     private void processMessage(Message message) {
         try {
-            // Parse the S3 event from the SQS message
             ObjectMapper mapper = new ObjectMapper();
             S3EventNotification s3Event = mapper.readValue(message.body(), S3EventNotification.class);
 
-            // Extract the S3 object key from the event
+            boolean processedSuccessfully = true;
             for (S3EventNotification.S3EventNotificationRecord record : s3Event.getRecords()) {
                 String bucketName = record.getS3().getBucket().getName();
                 String objectKey = record.getS3().getObject().getKey();
 
                 System.out.printf("Processing file: %s from bucket: %s%n", objectKey, bucketName);
 
-                // Process the object (replace with your logic)
-                processS3Object(bucketName, objectKey);
+                try {
+                    processS3Object(bucketName, objectKey);
+                } catch (Exception e) {
+                    processedSuccessfully = false;
+                    System.err.println("Error processing object: " + objectKey + " - " + e.getMessage());
+                    e.printStackTrace();
+                }
+            }
+
+            // Only delete the message if processing was successful
+            if (processedSuccessfully) {
+                deleteMessage(message);
             }
         } catch (Exception e) {
             System.err.println("Error processing message: " + e.getMessage());
@@ -138,9 +147,9 @@ public class SQSPoller {
     }
 
     public static void main(String[] args) {
-        String sourceBucket = "summarize-worker-ec2-021095";
-        String destinationBucket = "consolidate-worker-ec2-021095";
-        String queueUrl = "https://sqs.us-east-1.amazonaws.com/478245130330/poller-consolidate";  
+        String sourceBucket = "s3-summarized-data-ec2-021095";
+        String destinationBucket = "s3-consolidated-data-ec2-021095";
+        String queueUrl = "https://sqs.us-east-1.amazonaws.com/979238852085/sqs-to-consolidate-worker-ec2";  
 
         SQSPoller app = new SQSPoller(sourceBucket, destinationBucket, queueUrl);
         app.start();
