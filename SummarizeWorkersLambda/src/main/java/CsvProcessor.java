@@ -13,7 +13,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import com.amazonaws.services.s3.model.S3Object;
 import com.opencsv.exceptions.CsvException;
 
 import de.siegmar.fastcsv.reader.CsvReader;
@@ -24,25 +23,6 @@ public class CsvProcessor {
     private static final DateTimeFormatter INPUT_FORMATTER = new DateTimeFormatterBuilder()
             .appendPattern("dd/MM/yyyy hh:mm:ss a")
             .toFormatter(Locale.ENGLISH);
-
-    public void processFile(String bucketName, String objectKey) {
-        S3Handler s3Handler = new S3Handler();
-        try {
-            S3Object s3Object = s3Handler.getObject(bucketName, objectKey);
-            String processedCsv = processCsv(s3Object.getObjectContent());
-            SQSLambdaHandler sqsLambdaHandler = new SQSLambdaHandler();
-
-            String outputKey = "daily_summary_" + LocalDate.now() + "_" + objectKey;
-
-            s3Handler.uploadToS3(processedCsv, outputKey);
-            s3Handler.deleteFileFromS3(bucketName, objectKey);
-
-            System.out.println("Successfully processed and deleted " + objectKey);
-
-        } catch (Exception e) {
-            throw new RuntimeException("Error processing file from bucket: " + bucketName + ", key: " + objectKey, e);
-        }
-    }
 
     public String processCsv(InputStream inputStream) throws IOException, CsvException {
         Map<String, AggregatedData> dailyTraffic = Collections.synchronizedMap(new HashMap<>());
