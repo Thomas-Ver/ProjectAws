@@ -46,7 +46,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>BucketLoop</mainClass>
+                            <mainClass>SQSPoller</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>
@@ -143,4 +143,3 @@
       </dependency>
     </dependencies>
 </project>
-

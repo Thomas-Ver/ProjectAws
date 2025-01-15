@@ -120,8 +120,8 @@ public class BucketLoop {
     }
 
     public static void main(String[] args) {
-        String sourceBucket = "rawdata-ec2-021095";
-        String destinationBucket = "summarize-worker-ec2-021095";
+        String sourceBucket = "s3-raw-data-ec2-021095";
+        String destinationBucket = "s3-summarized-data-ec2-021095";
 
         BucketLoop app = new BucketLoop(sourceBucket, destinationBucket);
         app.start();
