@@ -1,15 +1,13 @@
-
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
-import com.amazonaws.services.lambda.runtime.events.SQSEvent;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.amazonaws.services.lambda.runtime.events.S3Event;
+import com.amazonaws.services.lambda.runtime.events.models.s3.S3EventNotification.S3EventNotificationRecord;
 
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.S3Exception;
 
-public class S3EventHandler implements RequestHandler<SQSEvent, String> {
+public class S3EventHandler implements RequestHandler<S3Event, String> {
 
     private final S3Client s3Client;
     private final String outputBucket = "s3-consolidated-data-lambda-021095";
@@ -19,31 +17,30 @@ public class S3EventHandler implements RequestHandler<SQSEvent, String> {
     }
 
     @Override
-    public String handleRequest(SQSEvent event, Context context) {
-        for (SQSEvent.SQSMessage message : event.getRecords()) {
-            try {
-                // Parse the JSON message
-                ObjectMapper mapper = new ObjectMapper();
-                JsonNode jsonNode = mapper.readTree(message.getBody());
+    public String handleRequest(S3Event event, Context context) {
+        try {
+            for (S3EventNotificationRecord record : event.getRecords()) {
+                String bucketName = record.getS3().getBucket().getName();
+                String fileName = record.getS3().getObject().getKey();
 
-                // Extract bucket name and file name from the S3 event
-                String bucketName = jsonNode.get("Records").get(0)
-                        .get("s3").get("bucket").get("name").asText();
-                String fileName = jsonNode.get("Records").get(0)
-                        .get("s3").get("object").get("key").asText();
+                // Only process CSV files
+                if (fileName.endsWith(".csv")) {
+                    context.getLogger().log("Processing file: " + fileName);
 
-                ConsolidateWorker worker = new ConsolidateWorker(outputBucket);
-                worker.run(bucketName, fileName);
+                    ConsolidateWorker worker = new ConsolidateWorker(outputBucket);
+                    worker.run(bucketName, fileName);
 
-                // Delete the processed file
-                deleteS3Object(bucketName, fileName);
+                    // Delete the processed file
+                    deleteS3Object(bucketName, fileName);
 
-            } catch (Exception e) {
-                context.getLogger().log("Error processing message: " + e.getMessage());
-                throw new RuntimeException("Error processing SQS message", e);
+                    context.getLogger().log("Successfully processed file: " + fileName);
+                }
             }
+            return "Processing completed successfully";
+        } catch (Exception e) {
+            context.getLogger().log("Error processing event: " + e.getMessage());
+            throw new RuntimeException("Error processing S3 event", e);
         }
-        return "Processing completed";
     }
 
     private void deleteS3Object(String bucketName, String key) {
