@@ -29,7 +29,7 @@ public class ConsolidateWorker {
 
     private final S3Client s3Client;
     private final String outputBucket;
-    private final String inputBucket;// Optional: to process files from specific folder
+    private final String inputBucket;
 
     public ConsolidateWorker(String inputBucket, String outputBucket) {
         this.s3Client = S3Client.builder().build();
@@ -40,7 +40,7 @@ public class ConsolidateWorker {
     public ConsolidateWorker(String outputBucket) {
         this.s3Client = S3Client.builder().build();
         this.outputBucket = outputBucket;
-        this.inputBucket = null; // Not needed for single file processing
+        this.inputBucket = null; 
     }
 
     public void run(String sourceBucket, String sourceKey) {
@@ -78,7 +78,7 @@ public class ConsolidateWorker {
             do {
                 listResponse = s3Client.listObjectsV2(listRequest);
                 for (S3Object s3Object : listResponse.contents()) {
-                    if (s3Object.key().endsWith(".csv")) { // Process only CSV files
+                    if (s3Object.key().endsWith(".csv")) { 
                         processFile(s3Object.key());
                     }
                 }
@@ -112,7 +112,6 @@ public class ConsolidateWorker {
 
             WriteNewhashmapToS3(batchMap, outputBucket, outputKey);
 
-            // Delete processed file
             deleteS3Object(inputBucket, sourceKey);
 
             System.out.println("Successfully processed " + sourceKey);
@@ -146,23 +145,19 @@ public class ConsolidateWorker {
         String forwardPackets = record[4];
         String date = record[0];
 
-        // Get or create the list for this key
         List<List<String>> existingValues = ConsolidateMap.computeIfAbsent(key, k -> new ArrayList<>());
 
-        // Create the new value list
         List<String> newValue = new ArrayList<>();
         newValue.add(date);
         newValue.add(flowDuration);
         newValue.add(forwardPackets);
 
-        // Check if this exact combination already exists
         boolean valueExists = existingValues.stream().anyMatch(existing
                 -> existing.get(0).equals(date)
                 && existing.get(1).equals(flowDuration)
                 && existing.get(2).equals(forwardPackets)
         );
 
-        // Only add if this exact combination doesn't exist
         if (!valueExists) {
             existingValues.add(newValue);
         }
@@ -180,45 +175,21 @@ public class ConsolidateWorker {
         }
     }
 
-    // public static boolean fileExistsOnS3(S3Client s3, String bucketName, String key) {
-    //     try {
-    //         HeadObjectRequest headObjectRequest = HeadObjectRequest.builder()
-    //                 .bucket(bucketName)
-    //                 .key(key)
-    //                 .build();
-    //         HeadObjectResponse response = s3.headObject(headObjectRequest);
-    //         return response != null;
-    //     } catch (S3Exception e) {
-    //         if (e.statusCode() == 404) {
-    //             return false; // Le fichier n'existe pas
-    //         } else {
-    //             System.err
-    //                     .println(
-    //                             "Erreur lors de la vérification de l'existence du fichier : " + e.awsErrorDetails().errorMessage());
-    //             throw e;
-    //         }
-    //     }
-    // }
     public void WriteNewhashmapToS3(HashMap<String, List<List<String>>> map, String bucketName, String outputKey) {
         try {
-            // Create output stream for serialized object
             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
             ObjectOutputStream objectOutputStream = new ObjectOutputStream(byteArrayOutputStream);
 
-            // Write serialized object to output stream
             objectOutputStream.writeObject(map);
             objectOutputStream.close();
 
-            // Convert output stream to byte array
             byte[] bytes = byteArrayOutputStream.toByteArray();
 
-            // Create upload request
             PutObjectRequest putObjectRequest = PutObjectRequest.builder()
                     .bucket(bucketName)
-                    .key(outputKey) // Use the provided outputKey instead of hardcoded "hashmap.ser"
+                    .key(outputKey)
                     .build();
 
-            // Upload serialized object to S3
             s3Client.putObject(putObjectRequest, RequestBody.fromBytes(bytes));
 
             System.out.println("Successfully uploaded batch file to S3: " + outputKey);

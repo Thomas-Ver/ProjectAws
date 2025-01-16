@@ -36,7 +36,6 @@ public class SQSPoller {
 
         while (isRunning) {
             try {
-                // Request to receive messages from SQS
                 ReceiveMessageRequest receiveRequest = ReceiveMessageRequest.builder()
                         .queueUrl(queueUrl)
                         .maxNumberOfMessages(1)
@@ -44,7 +43,6 @@ public class SQSPoller {
                         .visibilityTimeout(60)
                         .build();
 
-                // Receive messages from the queue
                 List<Message> messages = sqsClient.receiveMessage(receiveRequest).messages();
 
                 if (!messages.isEmpty()) {
@@ -68,6 +66,7 @@ public class SQSPoller {
             S3EventNotification s3Event = mapper.readValue(message.body(), S3EventNotification.class);
 
             boolean processedSuccessfully = true;
+
             for (S3EventNotification.S3EventNotificationRecord record : s3Event.getRecords()) {
                 String bucketName = record.getS3().getBucket().getName();
                 String objectKey = record.getS3().getObject().getKey();
@@ -83,7 +82,6 @@ public class SQSPoller {
                 }
             }
 
-            // Only delete the message if processing was successful
             if (processedSuccessfully) {
                 deleteMessage(message);
             }
@@ -95,7 +93,6 @@ public class SQSPoller {
 
     private void processS3Object(String sourceBucket, String fileKey) {
         try {
-            // Process the S3 object
             GetObjectRequest getObjectRequest = GetObjectRequest.builder()
                     .bucket(sourceBucket)
                     .key(fileKey)
@@ -105,7 +102,6 @@ public class SQSPoller {
                 worker.run(s3ObjectResponse, fileKey);
             }
 
-            // Delete the processed file from S3
             deleteFileFromSourceBucket(fileKey);
 
         } catch (Exception e) {

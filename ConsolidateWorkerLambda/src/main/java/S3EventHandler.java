@@ -23,14 +23,12 @@ public class S3EventHandler implements RequestHandler<S3Event, String> {
                 String bucketName = record.getS3().getBucket().getName();
                 String fileName = record.getS3().getObject().getKey();
 
-                // Only process CSV files
                 if (fileName.endsWith(".csv")) {
                     context.getLogger().log("Processing file: " + fileName);
 
                     ConsolidateWorker worker = new ConsolidateWorker(outputBucket);
                     worker.run(bucketName, fileName);
 
-                    // Delete the processed file
                     deleteS3Object(bucketName, fileName);
 
                     context.getLogger().log("Successfully processed file: " + fileName);
