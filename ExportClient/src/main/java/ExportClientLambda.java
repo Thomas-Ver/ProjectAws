@@ -17,7 +17,7 @@ import software.amazon.awssdk.services.s3.model.S3Exception;
 
 public class ExportClientLambda {
 
-    public static String bucketName = "s3-consolidated-data-ec2-021095";
+    public static String bucketName = "s3-consolidated-data-lambda-021095";
     public static String keyName = "hashmap.ser";
     public static Scanner scanner = new Scanner(System.in);
 

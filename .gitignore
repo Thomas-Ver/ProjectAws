@@ -1,6 +1,7 @@
 **/target
 **/.vscode
 ExportClient/**/*/
-ExportClient/.*
+ExportClient/**/.*
+ExportClient/*.*
 .idea/
 data_*

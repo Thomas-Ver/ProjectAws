@@ -150,7 +150,7 @@ public class SQSPoller {
     public static void main(String[] args) {
         String sourceBucket = "s3-summarized-data-ec2-021095";
         String destinationBucket = "s3-consolidated-data-ec2-021095";
-        String queueUrl = "https://sqs.us-east-1.amazonaws.com/979238852085/sqs-to-consolidate-worker-ec2";  
+        String queueUrl = "https://sqs.us-east-1.amazonaws.com/533975815005/ec2-sqs";  
 
         SQSPoller app = new SQSPoller(sourceBucket, destinationBucket, queueUrl);
         app.start();

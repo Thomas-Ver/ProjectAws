@@ -12,7 +12,7 @@ import software.amazon.awssdk.services.s3.model.S3Exception;
 public class S3EventHandler implements RequestHandler<SQSEvent, String> {
 
     private final S3Client s3Client;
-    private final String outputBucket = "s3-consolidated-data-021095";
+    private final String outputBucket = "s3-consolidated-data-lambda-021095";
 
     public S3EventHandler() {
         this.s3Client = S3Client.builder().build();
