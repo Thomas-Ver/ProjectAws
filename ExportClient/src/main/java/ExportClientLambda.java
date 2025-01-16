@@ -1,7 +1,6 @@
 
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -11,9 +10,13 @@ import java.util.Scanner;
 import software.amazon.awssdk.core.ResponseInputStream;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
+import software.amazon.awssdk.services.s3.model.GetObjectResponse;
 import software.amazon.awssdk.services.s3.model.HeadObjectRequest;
 import software.amazon.awssdk.services.s3.model.HeadObjectResponse;
+import software.amazon.awssdk.services.s3.model.ListObjectsV2Request;
+import software.amazon.awssdk.services.s3.model.ListObjectsV2Response;
 import software.amazon.awssdk.services.s3.model.S3Exception;
+import software.amazon.awssdk.services.s3.model.S3Object;
 
 public class ExportClientLambda {
 
@@ -46,51 +49,57 @@ public class ExportClientLambda {
     }
 
     public HashMap<String, List<List<String>>> ReadConsolidateMapFromS3(String bucketName, S3Client s3Client) {
-        HashMap<String, List<List<String>>> map = null;
+        HashMap<String, List<List<String>>> mergedMap = new HashMap<>();
 
         try {
-            // Vérifiez si le fichier existe sur S3
-            if (!fileExistsOnS3(s3Client, bucketName, "hashmap.ser")) {
-                System.out.println("Le fichier hashmap.set n'existe pas. Initialisation d'une HashMap vide.");
-                return new HashMap<>(); // Retourne une HashMap vide
-            }
-            // Créer une requête pour obtenir l'objet S3
-            GetObjectRequest getObjectRequest = GetObjectRequest.builder()
+            // List all batch files in the batches/ prefix
+            ListObjectsV2Request listRequest = ListObjectsV2Request.builder()
                     .bucket(bucketName)
-                    .key("hashmap.ser")
+                    .prefix("batches/")
                     .build();
 
-            // Récupérer l'objet S3 en tant que flux d'entrée
-            ResponseInputStream<?> s3ObjectStream = s3Client.getObject(getObjectRequest);
+            ListObjectsV2Response listResponse = s3Client.listObjectsV2(listRequest);
 
-            // Utiliser try-with-resources pour s'assurer que les flux sont fermés
-            try (InputStream inputStream = s3ObjectStream; ObjectInputStream objectInputStream = new ObjectInputStream(inputStream)) {
+            // Merge all batch files
+            for (S3Object s3Object : listResponse.contents()) {
+                GetObjectRequest getRequest = GetObjectRequest.builder()
+                        .bucket(bucketName)
+                        .key(s3Object.key())
+                        .build();
 
-                // Désérialiser l'objet
-                Object obj = objectInputStream.readObject();
-                if (obj instanceof HashMap) {
-                    // Suppression des avertissements de type
+                try (ResponseInputStream<GetObjectResponse> s3ObjectStream = s3Client.getObject(getRequest); ObjectInputStream objectInputStream = new ObjectInputStream(s3ObjectStream)) {
+
                     @SuppressWarnings("unchecked")
-                    HashMap<String, List<List<String>>> tempMap = (HashMap<String, List<List<String>>>) obj;
-                    map = tempMap;
-                } else {
-                    System.err.println("L'objet désérialisé n'est pas une HashMap.");
+                    HashMap<String, List<List<String>>> batchMap
+                            = (HashMap<String, List<List<String>>>) objectInputStream.readObject();
+
+                    // Merge this batch's data into the main map
+                    mergeMaps(mergedMap, batchMap);
                 }
             }
 
-            System.out.println("HashMap chargée depuis S3 avec succès.");
-        } catch (S3Exception e) {
-            System.err.println("Erreur S3 : " + e.awsErrorDetails().errorMessage());
-            e.printStackTrace();
-        } catch (IOException e) {
-            System.err.println("Erreur d'E/S lors de la lecture de l'objet S3.");
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
-            System.err.println("Classe non trouvée lors de la désérialisation.");
-            e.printStackTrace();
+        } catch (Exception e) {
+            throw new RuntimeException("Error reading batch files", e);
         }
 
-        return map;
+        return mergedMap;
+    }
+
+    private void mergeMaps(HashMap<String, List<List<String>>> target, HashMap<String, List<List<String>>> source) {
+        source.forEach((key, sourceList) -> {
+            List<List<String>> targetList = target.computeIfAbsent(key, k -> new ArrayList<>());
+            for (List<String> record : sourceList) {
+                // Add only if this exact combination doesn't exist
+                boolean exists = targetList.stream().anyMatch(existing
+                        -> existing.get(0).equals(record.get(0))
+                        && existing.get(1).equals(record.get(1))
+                        && existing.get(2).equals(record.get(2))
+                );
+                if (!exists) {
+                    targetList.add(record);
+                }
+            }
+        });
     }
 
     public static boolean fileExistsOnS3(S3Client s3, String bucketName, String key) {
